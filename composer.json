@@ -11,7 +11,8 @@
     "require": {
 		"leafo/scssphp": "^0.8",
 		"mrclay/jsmin-php": "^2.4",
-		"patchwork/jsqueeze": "^2.0"
+		"patchwork/jsqueeze": "^2.0",
+		"scssphp/scssphp": "^1.2"
 	},
 	"autoload": {
 		"psr-4": {

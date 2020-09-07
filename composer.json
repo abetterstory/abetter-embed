@@ -1,0 +1,31 @@
+{
+    "name": "abetter/embed",
+    "description": "A Better Laravel Embedding of Scripts & Styles, for exceptionally fast web applications.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Johan Sjöland",
+            "email": "johan@sjoland.com"
+        }
+    ],
+    "require": {
+		"leafo/scssphp": "^0.8",
+		"mrclay/jsmin-php": "^2.4",
+		"patchwork/jsqueeze": "^2.0"
+	},
+	"autoload": {
+		"psr-4": {
+			"ABetter\\Embed\\": "src/"
+		},
+		"files": [
+			"src/helpers.php"
+		]
+	},
+	"extra": {
+        "laravel": {
+            "providers": [
+                "ABetter\\Embed\\ServiceProvider"
+            ]
+        }
+    }
+}

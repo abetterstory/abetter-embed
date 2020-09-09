@@ -1,13 +1,10 @@
 @php
 
-$var = (object) ['hello' => "world"];
+use \ABetter\Embed\Embed;
 
-_log($var,"After");
-_log("Before",$var);
+$file = Embed::getFile($view ?? []);
+$render = Embed::renderFile($file);
 
-_log($var);
+echo $render;
 
 @endphp
-<h1>STYLE</h1>
-<p>{{ print_r($view ?? 'n/a') }}</p>
-<p>{{ print_r($data ?? 'n/a') }}</p>

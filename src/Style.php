@@ -3,19 +3,11 @@
 namespace ABetter\Embed;
 
 use Illuminate\View\Component;
+use ABetter\Embed\Embed as EmbedComponent;
 
-class Style extends Component {
+class Style extends EmbedComponent {
 
-	public $path;
-
-    public function __construct($path=NULL) {
-		$this->path = $path;
-    }
-
-    public function render() {
-		return function(array $data) {
-			return view('abetter-embed::components.style.style')->with('data',$data)->render();
-    	};
-    }
+	public $type = 'scss';
+	public $view = 'abetter-embed::components.style.style';
 
 }

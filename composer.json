@@ -25,7 +25,8 @@
 	"extra": {
         "laravel": {
             "providers": [
-                "ABetter\\Embed\\ServiceProvider"
+                "ABetter\\Embed\\ServiceProvider",
+				"ABetter\\Embed\\BladeServiceProvider"
             ]
         }
     }

@@ -2,7 +2,7 @@
 
 namespace ABetter\Embed;
 
-use Leafo\ScssPhp\Compiler;
+use ScssPhp\ScssPhp\Compiler;
 use Patchwork\JSqueeze;
 
 use Illuminate\View\Component;
@@ -121,7 +121,7 @@ class Embed extends Component {
 		$file->includes = self::parseScriptIncludes($file->source,$file);
 		if (!empty($file->slot)) $file->includes .= PHP_EOL.(string)$file->slot;
 		$file->render = $JSqueeze->squeeze($file->includes,TRUE,TRUE,FALSE);
-		$file->link = (env('APP_ENV') == 'sandbox') ? TRUE : $file->link;
+		$file->link = (env('APP_SANDBOX') || env('APP_ENV') == 'sandbox') ? TRUE : $file->link;
 		if ($file->link) {
 			if (!empty($file->async)) $file->attr .= ' async';
 			if (!empty($file->defer)) $file->attr .= ' defer';
@@ -166,7 +166,7 @@ class Embed extends Component {
 
 	public static function renderStyle($file) {
 		$Scss = new Compiler();
-		$Scss->setFormatter('Leafo\ScssPhp\Formatter\Compressed');
+		$Scss->setOutputStyle(\ScssPhp\ScssPhp\OutputStyle::COMPRESSED);
 		$Scss->setImportPaths([
 			$file->path,
 			resource_path('styles'),
@@ -179,7 +179,7 @@ class Embed extends Component {
 		$file->includes = self::parseStyleIncludes($file->source,$file);
 		if (!empty($file->slot)) $file->includes .= PHP_EOL.(string)$file->slot;
 		$file->render = $Scss->compile($file->includes);
-		$file->link = (env('APP_ENV') == 'sandbox') ? TRUE : $file->link;
+		$file->link = (env('APP_SANDBOX') || env('APP_ENV') == 'sandbox') ? TRUE : $file->link;
 		if ($file->link) {
 			$file->public = '/styles/components/'.str_replace($file->ext,'css',$file->base);
 			$file->location = public_path().$file->public;

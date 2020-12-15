@@ -195,8 +195,6 @@ class Embed extends Component {
 	}
 
 	public static function parseStyleIncludes($source,$file) {
-		// Handled by Sass @import/@include setImportPaths
-		/*
 		$source = preg_replace_callback('/\@include([^\;]+);/',function($matches) use ($file){
 			$include = trim($matches[1],'\'\" ');
 			if (preg_match('/^\~/',$include)) {
@@ -206,10 +204,11 @@ class Embed extends Component {
 			} else {
 				$include = ($file->path ?? base_path()) . '/'.$include;
 			}
-			_log($include);
+			if (!is_file($include)) {
+				$include .= '/'.basename($include);
+			}
 			return (is_file($include)) ? file_get_contents($include) : "";
 		},$source);
-		*/
 		return $source;
 	}
 

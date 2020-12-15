@@ -15,10 +15,22 @@ class BladeServiceProvider extends ServiceProvider {
 			return "<?php echo \ABetter\Embed\Embed::bladeStyle('{$file}',array_merge({$vars},get_defined_vars()){$link}); ?>";
         });
 
+		Blade::directive('mixstyle', function($expression){
+			list($file,$vars,$link) = self::parseExpression($expression);
+			$link = ($link) ? ',TRUE' : '';
+			return "<?php echo \ABetter\Embed\Embed::bladeMixStyle('{$file}',array_merge({$vars},get_defined_vars()){$link}); ?>";
+        });
+
         Blade::directive('script', function($expression){
 			list($file,$vars,$link) = self::parseExpression($expression);
 			$link = ($link) ? ',TRUE' : '';
 			return "<?php echo \ABetter\Embed\Embed::bladeScript('{$file}',array_merge({$vars},get_defined_vars()){$link}); ?>";
+        });
+
+		Blade::directive('mixscript', function($expression){
+			list($file,$vars,$link) = self::parseExpression($expression);
+			$link = ($link) ? ',TRUE' : '';
+			return "<?php echo \ABetter\Embed\Embed::bladeMixScript('{$file}',array_merge({$vars},get_defined_vars()){$link}); ?>";
         });
 
     }

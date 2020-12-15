@@ -107,10 +107,30 @@ class Embed extends Component {
 
 	// ---
 
+	public static function bladeMixScript($mix,$vars=[],$link=NULL) {
+		$file = new \StdClass();
+		$file->mix = mix($mix);
+		$file->name = public_path().'/'.$mix;
+		$file->attr = "";
+		$file->link = (env('APP_SANDBOX') || in_array(strtolower(env('APP_ENV')),['sandbox','local'])) ? TRUE : FALSE;
+		$file->link = ($link !== NULL) ? $link : $file->link;
+		$file->link = (isset($vars['link'])) ? $vars['link'] : $file->link;
+		if ($file->link) {
+			$file->return = "<script src=\"{$file->mix}\" type=\"text/javascript\" {$file->attr}></script>";
+		} else {
+			$file->source = (is_file($file->name)) ? trim(file_get_contents($file->name)) : "";
+			$file->return = "<script>{$file->source}</script>";
+		}
+		self::$embedded[$file->name] = TRUE;
+		return $file->return;
+	}
+
 	public static function bladeScript($file,$vars=[],$link=NULL) {
 		$path = $vars['view'][count($vars['view'])-1]['path'] ?? "";
 		$file = self::getFileFromPath($file,$path);
+		$file->link = (env('APP_SANDBOX') || in_array(strtolower(env('APP_ENV')),['sandbox','local'])) ? TRUE : FALSE;
 		$file->link = ($link !== NULL) ? $link : $file->link;
+		$file->link = (isset($vars['link'])) ? $vars['link'] : $file->link;
 		return Embed::renderScript($file);
 	}
 
@@ -121,7 +141,6 @@ class Embed extends Component {
 		$file->includes = self::parseScriptIncludes($file->source,$file);
 		if (!empty($file->slot)) $file->includes .= PHP_EOL.(string)$file->slot;
 		$file->render = $JSqueeze->squeeze($file->includes,TRUE,TRUE,FALSE);
-		$file->link = (env('APP_SANDBOX') || env('APP_ENV') == 'sandbox') ? TRUE : $file->link;
 		if ($file->link) {
 			if (!empty($file->async)) $file->attr .= ' async';
 			if (!empty($file->defer)) $file->attr .= ' defer';
@@ -142,9 +161,7 @@ class Embed extends Component {
 		$source = preg_replace_callback('/\@include\(([^\)]+)\);?/',function($matches) use ($file){
 			$include = trim($matches[1],'\'\"');
 			if (preg_match('/^\~/',$include)) {
-				$include = base_path().'/'.trim($include,'~');
-			} else if (preg_match('/node_modules/',$include)) {
-				$include = base_path().'/node_modules/'.str_replace(['/node_modules/','node_modules/'],['',''],$include);
+				$include = base_path().'/node_modules/'.trim($include,'~');
 			} else if (preg_match('/^\//',$include)) {
 				$include = base_path().$include;
 			} else {
@@ -157,10 +174,30 @@ class Embed extends Component {
 
 	// ---
 
+	public static function bladeMixStyle($mix,$vars=[],$link=NULL) {
+		$file = new \StdClass();
+		$file->mix = mix($mix);
+		$file->name = public_path().'/'.$mix;
+		$file->attr = "";
+		$file->link = (env('APP_SANDBOX') || in_array(strtolower(env('APP_ENV')),['sandbox','local'])) ? TRUE : FALSE;
+		$file->link = ($link !== NULL) ? $link : $file->link;
+		$file->link = (isset($vars['link'])) ? $vars['link'] : $file->link;
+		if ($file->link) {
+			$file->return = "<link href=\"{$file->mix}\" rel=\"stylesheet\" type=\"text/css\" {$file->attr}>";
+		} else {
+			$file->source = (is_file($file->name)) ? trim(file_get_contents($file->name)) : "";
+			$file->return = "<style>{$file->source}</style>";
+		}
+		self::$embedded[$file->name] = TRUE;
+		return $file->return;
+	}
+
 	public static function bladeStyle($file,$vars=[],$link=NULL) {
 		$path = $vars['view'][count($vars['view'])-1]['path'] ?? "";
 		$file = self::getFileFromPath($file,$path);
+		$file->link = (env('APP_SANDBOX') || in_array(strtolower(env('APP_ENV')),['sandbox','local'])) ? TRUE : FALSE;
 		$file->link = ($link !== NULL) ? $link : $file->link;
+		$file->link = (isset($vars['link'])) ? $vars['link'] : $file->link;
 		return Embed::renderStyle($file);
 	}
 
@@ -179,7 +216,6 @@ class Embed extends Component {
 		$file->includes = self::parseStyleIncludes($file->source,$file);
 		if (!empty($file->slot)) $file->includes .= PHP_EOL.(string)$file->slot;
 		$file->render = $Scss->compile($file->includes);
-		$file->link = (env('APP_SANDBOX') || env('APP_ENV') == 'sandbox') ? TRUE : $file->link;
 		if ($file->link) {
 			$file->public = '/styles/components/'.str_replace($file->ext,'css',$file->base);
 			$file->location = public_path().$file->public;

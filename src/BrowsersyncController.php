@@ -11,10 +11,10 @@ class BrowsersyncController extends BaseController {
 		$file = Embed::getFileFromPath($path);
 
 		if ($file->ext == 'scss' || $file->ext == 'css') {
-			Embed::renderStyle($file);
+			Embed::renderStyle($file,TRUE);
 			$this->data['message'] = "Updated style {$file->name}";
 		} else if ($file->ext == 'js') {
-			Embed::renderScript($file);
+			Embed::renderScript($file,TRUE);
 			$this->data['message'] = "Updated script {$file->name}";
 		} else {
 			$this->data['error'] = "BrowsersyncService not available for type {$file->ext}";

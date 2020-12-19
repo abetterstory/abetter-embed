@@ -134,14 +134,14 @@ class Embed extends Component {
 		return Embed::renderScript($file);
 	}
 
-	public static function renderScript($file) {
+	public static function renderScript($file,$forcelink=FALSE) {
 		$JSqueeze = new JSqueeze();
 		// ---
 		$file->source = (is_file($file->name)) ? trim(file_get_contents($file->name)) : "";
 		$file->includes = self::parseScriptIncludes($file->source,$file);
 		if (!empty($file->slot)) $file->includes .= PHP_EOL.(string)$file->slot;
 		$file->render = $JSqueeze->squeeze($file->includes,TRUE,TRUE,FALSE);
-		if ($file->link) {
+		if ($file->link || $forcelink) {
 			if (!empty($file->async)) $file->attr .= ' async';
 			if (!empty($file->defer)) $file->attr .= ' defer';
 			$file->public = '/scripts/components/'.str_replace($file->ext,'js',$file->base);
@@ -201,7 +201,7 @@ class Embed extends Component {
 		return Embed::renderStyle($file);
 	}
 
-	public static function renderStyle($file) {
+	public static function renderStyle($file,$forcelink=FALSE) {
 		$Scss = new Compiler();
 		$Scss->setOutputStyle(\ScssPhp\ScssPhp\OutputStyle::COMPRESSED);
 		$Scss->setImportPaths([
@@ -216,7 +216,7 @@ class Embed extends Component {
 		$file->includes = self::parseStyleIncludes($file->source,$file);
 		if (!empty($file->slot)) $file->includes .= PHP_EOL.(string)$file->slot;
 		$file->render = $Scss->compile($file->includes);
-		if ($file->link) {
+		if ($file->link || $forcelink) {
 			$file->public = '/styles/components/'.str_replace($file->ext,'css',$file->base);
 			$file->location = public_path().$file->public;
 			if (!is_dir(dirname($file->location))) mkdir(dirname($file->location),0777,TRUE);

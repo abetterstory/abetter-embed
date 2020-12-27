@@ -137,6 +137,7 @@ class Embed extends Component {
 	public static function renderScript($file,$forcelink=FALSE) {
 		$JSqueeze = new JSqueeze();
 		// ---
+		$file->publicpath = (in_array(strtolower(env('APP_ENV')),['production','stage'])) ? '/scripts/components/' : '/_dev/scripts/components/';
 		$file->source = (is_file($file->name)) ? trim(file_get_contents($file->name)) : "";
 		$file->includes = self::parseScriptIncludes($file->source,$file);
 		if (!empty($file->slot)) $file->includes .= PHP_EOL.(string)$file->slot;
@@ -144,7 +145,7 @@ class Embed extends Component {
 		if ($file->link || $forcelink) {
 			if (!empty($file->async)) $file->attr .= ' async';
 			if (!empty($file->defer)) $file->attr .= ' defer';
-			$file->public = '/scripts/components/'.str_replace($file->ext,'js',$file->base);
+			$file->public = $file->publicpath.str_replace($file->ext,'js',$file->base);
 			$file->location = public_path().$file->public;
 			if (!is_dir(dirname($file->location))) mkdir(dirname($file->location),0777,TRUE);
 			@file_put_contents($file->location,$file->render);
@@ -212,12 +213,13 @@ class Embed extends Component {
 			base_path().'/node_modules',
 		]);
 		// ---
+		$file->publicpath = (in_array(strtolower(env('APP_ENV')),['production','stage'])) ? '/styles/components/' : '/_dev/styles/components/';
 		$file->source = (is_file($file->name)) ? trim(file_get_contents($file->name)) : "";
 		$file->includes = self::parseStyleIncludes($file->source,$file);
 		if (!empty($file->slot)) $file->includes .= PHP_EOL.(string)$file->slot;
 		$file->render = $Scss->compile($file->includes);
 		if ($file->link || $forcelink) {
-			$file->public = '/styles/components/'.str_replace($file->ext,'css',$file->base);
+			$file->public = $file->publicpath.str_replace($file->ext,'css',$file->base);
 			$file->location = public_path().$file->public;
 			if (!is_dir(dirname($file->location))) mkdir(dirname($file->location),0777,TRUE);
 			@file_put_contents($file->location,$file->render);

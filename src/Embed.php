@@ -14,6 +14,7 @@ class Embed extends Component {
 
 	public static $files = [];
 	public static $embedded = [];
+	public static $component;
 
 	// ---
 
@@ -22,6 +23,7 @@ class Embed extends Component {
     }
 
     public function render() {
+		self::$component = $this->type;
 		return function(array $data) {
 			return view($this->view)->with([
 				'type' => $this->type,
@@ -38,6 +40,7 @@ class Embed extends Component {
 		$file->first = reset($views);
 		$file->last = end($views);
 		$file->current = NULL;
+		$file->inline = FALSE;
 		$file->name = "";
 		foreach ($file->views AS $i => $view) {
 			if (!empty($file->current)) continue;
@@ -66,8 +69,9 @@ class Embed extends Component {
 		$file->is = is_file($file->name);
 		if (empty($file->type) && !empty($file->slot)) {
 			$file->link = FALSE;
+			$file->inline = TRUE;
 			$file->name = md5($file->slot);
-			$file->source = (string) $file->slot;
+			$file->type = self::getType(self::$component ?? NULL);
 		}
 		self::$files[$file->name] = $file;
 		return $file;
@@ -101,21 +105,13 @@ class Embed extends Component {
 		if (empty($file->name)) return;
 		if (isset(self::$embedded[$file->name])) {
 			return "<!--skip:{$file->name}-->";
-		} else if (!empty($file->slot)) {
-			return self::renderSlot($file);
-		} else if (empty($file->is)) {
+		} else if (empty($file->is) && empty($file->inline)) {
 			return "<!--missing:{$file->name}-->";
 		} else if ($file->type == 'script') {
 			return self::renderScript($file);
 		} else if ($file->type == 'style') {
 			return self::renderStyle($file);
 		}
-	}
-
-	// ---
-
-	public static function renderSlot($file) {
-		return "<!--error:{$file->name}-->";
 	}
 
 	// ---
@@ -151,7 +147,7 @@ class Embed extends Component {
 		$JSqueeze = new JSqueeze();
 		// ---
 		$file->publicpath = (in_array(strtolower(env('APP_ENV')),['production','stage'])) ? '/scripts/components/' : '/_dev/scripts/components/';
-		$file->source = (empty($file->source) && is_file($file->name)) ? trim(file_get_contents($file->name)) : $file->source;
+		$file->source = (empty($file->source) && is_file($file->name)) ? trim(file_get_contents($file->name)) : "";
 		$file->includes = self::parseScriptIncludes($file->source,$file);
 		if (!empty($file->slot)) $file->includes .= PHP_EOL.(string)$file->slot;
 		$file->render = $JSqueeze->squeeze($file->includes,TRUE,TRUE,FALSE);
@@ -227,7 +223,7 @@ class Embed extends Component {
 		]);
 		// ---
 		$file->publicpath = (in_array(strtolower(env('APP_ENV')),['production','stage'])) ? '/styles/components/' : '/_dev/styles/components/';
-		$file->source = (empty($file->source) && is_file($file->name)) ? trim(file_get_contents($file->name)) : $file->source;
+		$file->source = (empty($file->source) && is_file($file->name)) ? trim(file_get_contents($file->name)) : "";
 		$file->includes = self::parseStyleIncludes($file->source,$file);
 		if (!empty($file->slot)) $file->includes .= PHP_EOL.(string)$file->slot;
 		$file->render = $Scss->compile($file->includes);

@@ -15,6 +15,7 @@ class Embed extends Component {
 	public static $files = [];
 	public static $embedded = [];
 	public static $component;
+	public static $production;
 
 	// ---
 
@@ -24,6 +25,7 @@ class Embed extends Component {
 
     public function render() {
 		self::$component = $this->type;
+		self::$production = (in_array(strtolower(env('APP_ENV')),['stage','production']));
 		return function(array $data) {
 			return view($this->view)->with([
 				'type' => $this->type,
@@ -104,9 +106,9 @@ class Embed extends Component {
 		$file = (is_string($file)) ? (self::$files[$file] ?? NULL) : $file;
 		if (empty($file->name)) return;
 		if (isset(self::$embedded[$file->name])) {
-			return "<!--skip:{$file->name}-->";
+			return (self::$production) ? "" : "<!--skip:{$file->name}-->";
 		} else if (empty($file->is) && empty($file->inline)) {
-			return "<!--missing:{$file->name}-->";
+			return (self::$production) ? "" : "<!--missing:{$file->name}-->";
 		} else if ($file->type == 'script') {
 			return self::renderScript($file);
 		} else if ($file->type == 'style') {

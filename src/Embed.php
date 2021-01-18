@@ -64,6 +64,11 @@ class Embed extends Component {
 			$file->name = realpath($file->name);
 		}
 		$file->is = is_file($file->name);
+		if (empty($file->type) && !empty($file->slot)) {
+			$file->link = FALSE;
+			$file->name = md5($file->slot);
+			$file->source = (string) $file->slot;
+		}
 		self::$files[$file->name] = $file;
 		return $file;
 	}
@@ -96,6 +101,8 @@ class Embed extends Component {
 		if (empty($file->name)) return;
 		if (isset(self::$embedded[$file->name])) {
 			return "<!--skip:{$file->name}-->";
+		} else if (!empty($file->slot)) {
+			return self::renderSlot($file);
 		} else if (empty($file->is)) {
 			return "<!--missing:{$file->name}-->";
 		} else if ($file->type == 'script') {
@@ -103,6 +110,12 @@ class Embed extends Component {
 		} else if ($file->type == 'style') {
 			return self::renderStyle($file);
 		}
+	}
+
+	// ---
+
+	public static function renderSlot($file) {
+		return "<!--error:{$file->name}-->";
 	}
 
 	// ---
@@ -138,7 +151,7 @@ class Embed extends Component {
 		$JSqueeze = new JSqueeze();
 		// ---
 		$file->publicpath = (in_array(strtolower(env('APP_ENV')),['production','stage'])) ? '/scripts/components/' : '/_dev/scripts/components/';
-		$file->source = (is_file($file->name)) ? trim(file_get_contents($file->name)) : "";
+		$file->source = (empty($file->source) && is_file($file->name)) ? trim(file_get_contents($file->name)) : $file->source;
 		$file->includes = self::parseScriptIncludes($file->source,$file);
 		if (!empty($file->slot)) $file->includes .= PHP_EOL.(string)$file->slot;
 		$file->render = $JSqueeze->squeeze($file->includes,TRUE,TRUE,FALSE);
@@ -214,7 +227,7 @@ class Embed extends Component {
 		]);
 		// ---
 		$file->publicpath = (in_array(strtolower(env('APP_ENV')),['production','stage'])) ? '/styles/components/' : '/_dev/styles/components/';
-		$file->source = (is_file($file->name)) ? trim(file_get_contents($file->name)) : "";
+		$file->source = (empty($file->source) && is_file($file->name)) ? trim(file_get_contents($file->name)) : $file->source;
 		$file->includes = self::parseStyleIncludes($file->source,$file);
 		if (!empty($file->slot)) $file->includes .= PHP_EOL.(string)$file->slot;
 		$file->render = $Scss->compile($file->includes);

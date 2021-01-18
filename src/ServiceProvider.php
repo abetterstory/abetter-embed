@@ -13,7 +13,7 @@ class ServiceProvider extends BaseServiceProvider {
 		$this->loadViewsFrom(__DIR__.'/../views', 'abetter-embed');
 
 		$this->loadViewComponentsAs('', [
-			Embed::class,
+			//Embed::class,
 	        Script::class,
 	        Style::class,
 	    ]);

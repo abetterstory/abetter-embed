@@ -85,6 +85,7 @@ class Embed extends Component {
 		$file->path = dirname($file->name);
 		$file->base = basename($file->name);
 		$file->ext = pathinfo($file->name, PATHINFO_EXTENSION);
+		$file->is = is_file($file->name);
 		$file->type = self::getType($file->ext);
 		$file->link = FALSE;
 		$file->attr = "";
@@ -142,7 +143,7 @@ class Embed extends Component {
 		$file->link = (env('APP_SANDBOX') || in_array(strtolower(env('APP_ENV')),['sandbox','local'])) ? TRUE : FALSE;
 		$file->link = ($link !== NULL) ? $link : $file->link;
 		$file->link = (isset($vars['link'])) ? $vars['link'] : $file->link;
-		return Embed::renderScript($file);
+		return Embed::renderFile($file);
 	}
 
 	public static function renderScript($file,$forcelink=FALSE) {
@@ -210,7 +211,7 @@ class Embed extends Component {
 		$file->link = (env('APP_SANDBOX') || in_array(strtolower(env('APP_ENV')),['sandbox','local'])) ? TRUE : FALSE;
 		$file->link = ($link !== NULL) ? $link : $file->link;
 		$file->link = (isset($vars['link'])) ? $vars['link'] : $file->link;
-		return Embed::renderStyle($file);
+		return Embed::renderFile($file);
 	}
 
 	public static function renderStyle($file,$forcelink=FALSE) {

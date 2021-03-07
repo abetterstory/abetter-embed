@@ -46,7 +46,7 @@ class Embed extends Component {
 		$file->name = "";
 		foreach ($file->views AS $i => $view) {
 			if (!empty($file->current)) continue;
-			if (in_array($view['file'],['embed.blade.php','script.blade.php','style.blade.php'])) continue;
+			if (in_array($view['file'],['embed.blade.php','script.blade.php','style.blade.php','asset.blade.php'])) continue;
 			$file->current = $view;
 		}
 		$file->attr = "";
@@ -82,10 +82,26 @@ class Embed extends Component {
 	public static function getFileFromPath($name,$path=NULL) {
 		$file = new \StdClass();
 		$file->name = (($path)?$path:base_path()).'/'.$name;
+		$file->is = is_file($file->name);
 		$file->path = dirname($file->name);
 		$file->base = basename($file->name);
 		$file->ext = pathinfo($file->name, PATHINFO_EXTENSION);
-		$file->is = is_file($file->name);
+		$file->type = self::getType($file->ext);
+		$file->link = FALSE;
+		$file->attr = "";
+		return $file;
+	}
+
+	public static function getAssetFromPath($name,$path=NULL) {
+		$file = new \StdClass();
+		$file->name = (($path)?$path:resource_path()).'/'.$name;
+		if (!$file->is = is_file($file->name)) {
+			$file->name = resource_path().'/'.$name;
+			$file->is = is_file($file->name);
+		}
+		$file->path = dirname($file->name);
+		$file->base = basename($file->name);
+		$file->ext = pathinfo($file->name, PATHINFO_EXTENSION);
 		$file->type = self::getType($file->ext);
 		$file->link = FALSE;
 		$file->attr = "";
@@ -97,6 +113,7 @@ class Embed extends Component {
 			'js' => 'script',
 			'css' => 'style',
 			'scss' => 'style',
+			'svg' => 'asset',
 		];
 		return $types[$ext] ?? "";
 	}
@@ -114,6 +131,8 @@ class Embed extends Component {
 			return self::renderScript($file);
 		} else if ($file->type == 'style') {
 			return self::renderStyle($file);
+		} else if ($file->type == 'asset') {
+			return self::renderAsset($file);
 		}
 	}
 
@@ -260,6 +279,28 @@ class Embed extends Component {
 			return (is_file($include)) ? file_get_contents($include) : "";
 		},$source);
 		return $source;
+	}
+
+	// ---
+
+	public static function renderAsset($file,$forcelink=FALSE) {
+		$file->return = "";
+		$file->mime = @mime_content_type($file->name);
+		$file->source = @file_get_contents($file->name);
+		if ($file->ext == 'svg') {
+			$file->return = $file->source;
+		} else if (in_array($file->ext,['jpeg','jpg','png','gif'])) {
+			$file->encoded = base64_encode($file->source);
+			$file->return = "<img src=\"data:{$file->mime};base64,{$file->encoded}\" {$file->attr}>";
+		}
+		return $file->return;
+	}
+
+	public static function bladeAsset($file,$vars=[],$link=NULL) {
+		$path = $vars['view'][count($vars['view'])-1]['path'] ?? "";
+		$file = self::getAssetFromPath($file,$path);
+		$file->link = FALSE;
+		return Embed::renderAsset($file);
 	}
 
 }

@@ -33,6 +33,12 @@ class BladeServiceProvider extends ServiceProvider {
 			return "<?php echo \ABetter\Embed\Script::bladeMixScript('{$file}',array_merge({$vars},get_defined_vars()){$link}); ?>";
         });
 
+        Blade::directive('asset', function($expression){
+			list($file,$vars,$link) = self::parseExpression($expression);
+			$link = ($link) ? ',TRUE' : '';
+			return "<?php echo \ABetter\Embed\Asset::bladeAsset('{$file}',array_merge({$vars},get_defined_vars()){$link}); ?>";
+        });
+
 		// Components
 		Blade::component('style', Style::class);
 		Blade::component('script', Script::class);

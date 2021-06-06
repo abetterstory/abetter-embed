@@ -241,6 +241,7 @@ class Embed extends Component {
 			resource_path('styles'),
 			resource_path('sass'),
 			resource_path('css'),
+			resource_path('views'),
 			base_path().'/node_modules',
 		]);
 		// ---
